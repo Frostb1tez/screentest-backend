@@ -17,7 +17,15 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async createUser(dto: SignUpDto) {
+  //TODO: should define for getMe function
+  async getMe(id: number) {
+    const user = await this.usersRepository.findOne(id)
+    if (!user) throw new NotFoundException('user not found')
+    const { password, ...userWithoutPassword } = user
+    return { user: userWithoutPassword }
+  }
+
+  async createUser(dto: SignUpDto): Promise<User> {
     const { email, username } = dto
     const userEntity = await this.usersRepository.findOne({ where: [{ email }, { username }] })
     if (userEntity) throw new ConflictException('duplicate username or email')
@@ -26,18 +34,20 @@ export class AuthService {
   }
 
   async login(dto: SignInPasswordDto) {
-    const { email, password } = dto
-    const userEntity = await this.usersRepository.findOne({ email: email.toLocaleLowerCase() })
+    const { identity, password } = dto
+    const userEntity = await this.usersRepository.findOne({ where: [{ email: identity }, { username: identity }] })
     if (!userEntity) throw new NotFoundException('username or password invalid')
-    const isPasswordValidate = await bcrypt.compare(password, userEntity.password)
+
+    const { password: userPassword, ...user } = userEntity
+    const isPasswordValidate = await bcrypt.compare(password, userPassword)
     if (!isPasswordValidate) throw new NotFoundException('username or password invalid')
 
     const jwtToken = await this.signJwtToken(userEntity)
 
-    return { success: true, token: jwtToken }
+    return { success: true, accessToken: jwtToken, user }
   }
 
-  private async signJwtToken(user: User) {
+  private async signJwtToken(user: User): Promise<string> {
     const { id, username, email } = user
     return this.jwtService.sign({ id, username, email })
   }

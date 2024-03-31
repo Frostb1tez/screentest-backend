@@ -1,15 +1,17 @@
 // eslint-disable-next-line
 require('dotenv').config()
-import { NestFactory } from '@nestjs/core'
-import { ConfigService } from '@nestjs/config'
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import type { NestExpressApplication } from '@nestjs/platform-express'
+
+import { ConfigService } from '@nestjs/config'
+import { NestFactory } from '@nestjs/core'
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import * as helmet from 'helmet'
 
 import { AppModule } from './app.module'
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule)
+  app.setGlobalPrefix('/api')
   app.enableCors()
   app.use(helmet())
   if (process.env.MODE !== 'production') {

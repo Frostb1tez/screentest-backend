@@ -25,6 +25,15 @@ export class User {
   @Column({ unique: true })
   username: string
 
+  @Column()
+  fullName: string
+
+  @Column({ nullable: true })
+  avatarUrl?: string
+
+  @Column({ nullable: true })
+  otherDetails?: string
+
   @Column({
     type: 'enum',
     enum: Provider,
@@ -32,14 +41,20 @@ export class User {
   })
   provider: Provider
 
-  @BeforeInsert() async hashPassword() {
+  @BeforeInsert()
+  @BeforeUpdate()
+  async hashPassword() {
     if (this.password) this.password = await bcrypt.hash(this.password, 10)
   }
   @BeforeInsert()
+  @BeforeUpdate()
   emailtoLowerCase() {
     if (this.email) this.email = this.email.toLowerCase()
   }
-  @BeforeUpdate() async hashUpdatePassword() {
-    if (this.password) this.password = await bcrypt.hash(this.password, 10)
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  usernametoLowerCase() {
+    if (this.username) this.username = this.username.toLowerCase()
   }
 }

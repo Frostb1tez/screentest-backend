@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common'
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common'
 import { AuthGuard } from '@nestjs/passport'
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger'
 
@@ -14,8 +14,9 @@ export class AuthController {
   @Get('me')
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
-  async me() {
-    return 'test'
+  async me(@Req() request) {
+    const { id } = request.user
+    return this.authService.getMe(id)
   }
 
   @Post('sign-in')
