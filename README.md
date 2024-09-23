@@ -1,73 +1,102 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
-</p>
+# Backend Questions
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## 1. Assuming the system currently has three microservices: Customer API, Master Data API,and Transaction Data API, there is a new feature that requires data from all three microservices to be displayed in near real-time. The current technology stack includes REST APIs and an RDBMS database. How would you design a new API for this feature?
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+##### In my opinion, I will use EDA, Redis for caching, and Web-socket for sending data to clients in real-time. When I request from the client to a new service. It should send a message pattern to rabbitMQ. then other services should handle message patterns. next, it fetches data and sends a message pattern with data to rabbitMQ again. next, a new service should handle and keep it to Redis. Also, when data is updated should handle it and update it to Redis. Finally, A new service handles messages as well as WebSocket sends data to clients.
 
-## Description
+## 2.Assuming the team has started planning a new project, the project manager asks you for a performance test strategy plan for this release. How would you recommend proceeding to the project manager?
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+##### I will create meetings to understand the project's performance goals and expectations. then identify key performance indicators. next, define user workflows and performance metrics. if the team encounters performance issues. We should talk about finding a resolution. After that, we should retest.
 
-## Installation
+## What is useCallback
 
-```bash
-$ npm install
-```
+##### It's used to optimize performance in React applications when passing props to child components
 
-## Running the app
+## Write a unit test for the UserProfile React component using Jest and React Testing Library.
 
-```bash
-# development
-$ npm run start
+global.fetch = jest.fn();
 
-# watch mode
-$ npm run start:dev
+describe('UserProfile', () => {
+afterEach(() => {
+jest.clearAllMocks();
+});
 
-# production mode
-$ npm run start:prod
-```
+test('renders loading state initially', () => {
+render(<UserProfile userId="123" />);
+expect(screen.getByText('Loading...')).toBeInTheDocument();
+});
 
-## Test
+test('renders user data when fetch is successful', async () => {
+const mockUser = { name: 'John Doe', email: 'john@example.com' };
+fetch.mockResolvedValueOnce({
+ok: true,
+json: async () => mockUser,
+});
 
-```bash
-# unit tests
-$ npm run test
+    render(<UserProfile userId="123" />);
 
-# e2e tests
-$ npm run test:e2e
+    await waitFor(() => {
+      expect(screen.getByText('John Doe')).toBeInTheDocument();
+      expect(screen.getByText('Email: john@example.com')).toBeInTheDocument();
+    });
 
-# test coverage
-$ npm run test:cov
-```
+    expect(fetch).toHaveBeenCalledWith('https://api.example.com/users/123');
 
-## Support
+});
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+test('renders error message when fetch fails', async () => {
+fetch.mockRejectedValueOnce(new Error('Failed to fetch user data'));
 
-## Stay in touch
+    render(<UserProfile userId="123" />);
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+    await waitFor(() => {
+      expect(screen.getByText('Error: Failed to fetch user data')).toBeInTheDocument();
+    });
 
-## License
+});
 
-Nest is [MIT licensed](LICENSE).
+test('renders error message when response is not ok', async () => {
+fetch.mockResolvedValueOnce({
+ok: false,
+});
+
+    render(<UserProfile userId="123" />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Error: Failed to fetch user data')).toBeInTheDocument();
+    });
+
+});
+
+test('fetches new user data when userId prop changes', async () => {
+const mockUser1 = { name: 'John Doe', email: 'john@example.com' };
+const mockUser2 = { name: 'Jane Smith', email: 'jane@example.com' };
+
+    fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockUser1,
+    });
+
+    const { rerender } = render(<UserProfile userId="123" />);
+
+    await waitFor(() => {
+      expect(screen.getByText('John Doe')).toBeInTheDocument();
+    });
+
+    fetch.mockResolvedValueOnce({
+      ok: true,
+      json: async () => mockUser2,
+    });
+
+    rerender(<UserProfile userId="456" />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Jane Smith')).toBeInTheDocument();
+    });
+
+    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(fetch).toHaveBeenNthCalledWith(1, 'https://api.example.com/users/123');
+    expect(fetch).toHaveBeenNthCalledWith(2, 'https://api.example.com/users/456');
+
+});
+});

@@ -2,15 +2,15 @@ import type { ConnectionOptions } from 'typeorm'
 
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies'
 
-import configuation from './configuration'
-const config = configuation()
+import configuration from './configuration'
+const config = configuration()
 const connectionOptions: ConnectionOptions = {
   type: 'postgres',
-  host: config.database.host,
-  port: config.database.port,
-  username: config.database.username,
-  password: config.database.password,
-  database: config.database.name,
+  host: config.database.host || 'localhost',
+  port: config.database.port || 5432,
+  username: config.database.username || 'postgres',
+  password: config.database.password || 'Hello123',
+  database: config.database.name || 'postgres',
   namingStrategy: new SnakeNamingStrategy(),
   entities: [__dirname + '/../entities/*.entity{.ts,.js}'],
   migrations: [__dirname + '/../migration/*{.ts,.js}'],

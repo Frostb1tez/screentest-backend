@@ -29,6 +29,20 @@ module.exports = {
           order: 'asc',
           caseInsensitive: true,
         },
+        pathGroups: [
+          {
+            pattern: '@nestjs/**',
+            group: 'external',
+            position: 'before',
+          },
+          {
+            pattern: '@/**',
+            group: 'internal',
+            position: 'after',
+          },
+        ],
+        pathGroupsExcludedImportTypes: ['@nestjs/**', '@/**'],
+        distinctGroup: false,
       },
     ],
     '@typescript-eslint/interface-name-prefix': 0,

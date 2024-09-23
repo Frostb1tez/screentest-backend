@@ -5,8 +5,8 @@ import { TypeOrmModule } from '@nestjs/typeorm'
 
 import configuration from './config/configuration'
 import connectionOptions from './config/typeorm'
-import { AuthModule } from './modules/auth/auth.module'
 import { EmailModule } from './modules/email/email.module'
+import { ProductModule } from './modules/product/product.module'
 
 @Module({
   imports: [
@@ -16,8 +16,8 @@ import { EmailModule } from './modules/email/email.module'
       isGlobal: true,
     }),
     TypeOrmModule.forRoot(connectionOptions),
-    AuthModule,
     EmailModule,
+    ProductModule,
   ],
   providers: [
     {
